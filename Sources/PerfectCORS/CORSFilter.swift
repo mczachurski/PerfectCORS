@@ -10,13 +10,76 @@ import PerfectHTTP
 
 public class CORSFilter: HTTPRequestFilter {
 
+    /**
+        List of allowed origins.
+
+        Configures the values returned in Access-Control-Allow-Origin header
+        ([more information](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Origin)).
+        If list is empty all origins are allowed.
+     */
     public let origin: [String]?
+
+    /**
+        List of allowed HTTP methods.
+
+        Configures the values returned in Access-Control-Allow-Methods header
+        ([more information](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Methods)).
+        If list is empty methods: `GET`, `POST`, `PUT`, `DELETE`, `PATCH` are allowed.
+    */
     public let methods: [HTTPMethod]?
+
+    /**
+        List of allowed HTTP headers.
+
+        Configures the values returned in Access-Control-Allow-Headers header
+        ([more information](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Headers)).
+        If list is empty all headers from request are allowed.
+    */
     public let allowedHeaders: [HTTPRequestHeader.Name]?
+
+    /**
+        List of exposed HTTP headers.
+
+        Configures the values returned in Access-Control-Expose-Headers header
+        ([more information](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Expose-Headers)).
+        If list is empty no custom headers are exposed.
+    */
     public let exposedHeaders: [HTTPResponseHeader.Name]?
+
+    /**
+        Information about CORS cache.
+
+        Configures the value returned in Access-Control-Max-Age header. Indicates how long
+        the results of a preflight request (that is the information contained in the
+        Access-Control-Allow-Methods and Access-Control-Allow-Headers headers) can be cached
+        ([more information](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Expose-Headers)).
+        If is not specified header is omitted.
+    */
     public let maxAge: Double?
+
+    /**
+        Information about exposing credentials header.
+
+        Configures the value returned in Access-Control-Allow-Credentials.
+        The Access-Control-Allow-Credentials response header indicates whether or not the
+        response to the request can be exposed to the page. It can be exposed when the true
+        value is returned
+        ([more information](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Credentials)).
+        If is not specified header is omitted.
+    */
     public let credentials: Bool?
 
+    /**
+        Filter initialization.
+
+        - Parameters:
+            - origin: List of allowed origins.
+            - methods: List of allowed HTTP methods.
+            - allowedHeaders: List of allowed HTTP headers.
+            - exposedHeaders: List of exposed HTTP headers.
+            - maxAge: Information about CORS cache.
+            - credentials: Information about exposing credentials header.
+    */
     public init(origin: [String]? = nil,
                 methods: [HTTPMethod]? = nil,
                 allowedHeaders: [HTTPRequestHeader.Name]? = nil,
@@ -31,6 +94,9 @@ public class CORSFilter: HTTPRequestFilter {
         self.credentials = credentials
     }
 
+    /**
+        Perfect server filter. Called once after the request has been read but before any handler is executed.
+    */
     public func filter(request: HTTPRequest, response: HTTPResponse, callback: (HTTPRequestFilterResult) -> Void) {
 
         if request.method == .options {
@@ -61,10 +127,8 @@ public class CORSFilter: HTTPRequestFilter {
     }
 
     private func configureMaxAge(response: HTTPResponse) {
-        if let maxAge = self.maxAge {
-            if maxAge > 0 {
-                response.setHeader(.accessControlMaxAge, value: String(maxAge))
-            }
+        if let maxAge = self.maxAge, maxAge > 0 {
+            response.setHeader(.accessControlMaxAge, value: String(maxAge))
         }
     }
 
@@ -86,11 +150,10 @@ public class CORSFilter: HTTPRequestFilter {
 
     private func configureOrigin(request: HTTPRequest, response: HTTPResponse) {
         if let origin = self.origin {
-            if let requestOrigin = request.header(.origin) {
-                if origin.index(of: requestOrigin) != nil {
-                    response.setHeader(.accessControlAllowOrigin, value: requestOrigin)
-                    return
-                }
+
+            if let requestOrigin = request.header(.origin), origin.index(of: requestOrigin) != nil {
+                response.setHeader(.accessControlAllowOrigin, value: requestOrigin)
+                return
             }
 
             response.setHeader(.accessControlAllowOrigin, value: "false")
