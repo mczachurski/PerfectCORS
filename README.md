@@ -10,7 +10,7 @@ PerfectCORS is a Swift package which enables [CORS](https://en.wikipedia.org/wik
 
 To install PerfectCORS with package manager add dependencies to your `Package.swift` file.
 
-```
+```swift
 import PackageDescription
 
 let package = Package(
@@ -32,7 +32,7 @@ let package = Package(
 
 ### Enable all CORS requests
 
-```
+```swift
 import PerfectHTTP
 import PerfectHTTPServer
  
@@ -63,7 +63,7 @@ do {
 
 ### Configuring CORS
 
-```
+```swift
 import PerfectHTTP
 import PerfectHTTPServer
  
